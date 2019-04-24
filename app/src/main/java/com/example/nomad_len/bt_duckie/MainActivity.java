@@ -13,7 +13,9 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -25,6 +27,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -33,7 +36,7 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnKeyListener {
 
     BluetoothAdapter mBluetoothAdapter;
     BluetoothDevice mBluetoothDevice;
@@ -49,9 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
     EditText edtxt_test;
 
+    TextView txtvi_hello;
+
     Switch sw_test;
 
     //Keyboard mkeyboard;
+
+
+    private TextWatcher myTextWatch = null;
 
 
     @Override
@@ -61,11 +69,51 @@ public class MainActivity extends AppCompatActivity {
 
         edtxt_test = (EditText) findViewById(R.id.edtxt_test);
         sw_test = (Switch) findViewById(R.id.switch1);
+        txtvi_hello = (TextView) findViewById(R.id.textView2);
 
        InputMethodManager myimm = ((InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE));
 
        myimm.showInputMethodPicker();
 
+
+        myTextWatch = new TextWatcher() {
+           @Override
+           public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+           }
+
+           @Override
+           public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+               //Log.d("hello tag change", "text changed ! " + charSequence);
+               txtvi_hello.setText(edtxt_test.getText().toString());
+
+           }
+
+           @Override
+           public void afterTextChanged(Editable editable) {
+
+           }
+
+       };
+
+        txtvi_hello.addTextChangedListener(myTextWatch);
+
+       // ---------------------------------------------------------------------
+
+        edtxt_test.setOnKeyListener(this);
+
+/*       edtxt_test.setOnKeyListener(new View.OnKeyListener() {
+           @Override
+           public boolean onKey(View view, int i, KeyEvent keyEvent) {
+               if( (keyEvent.getAction() == KeyEvent.ACTION_DOWN)){
+                   Log.d("hello tag", "key clicked ! " + i);
+
+                   return true;
+               }
+               return false;
+           }
+       });*/
        sw_test.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
            @Override
            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -81,9 +129,33 @@ public class MainActivity extends AppCompatActivity {
            }
        });
 
+       txtvi_hello.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+
+               toastMessage("clic");
+
+               try {
+                   send_to_BT_device(String.valueOf("D"));
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+
+           }
+       });
+
         //startActivityForResult( new Intent((Settings.ACTION_INPUT_METHOD_SETTINGS)),0);
 
 
+    }
+
+
+    @Override
+    public boolean onKey(View v, int KeyCode, KeyEvent event){
+
+        Log.d("hello tag g ", "key clicked ! " + event.getUnicodeChar());
+
+        return false;
     }
 
     /*public void registerEditText(int resid) {
@@ -119,13 +191,35 @@ public class MainActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         super.onKeyDown(keyCode, event);
 
+        Log.d("hello tag gg ", "key clicked ! " + keyCode);
+
+        return super.onKeyDown(keyCode,event);
+
+    }
+
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        Log.d("hello", String.valueOf((event.getKeyCode())));
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            Log.d("hello2", String.valueOf((event.toString())));
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+
+
+    public void onKey(int primaryCode, int[] keyCodes) {
+
+        toastMessage("onKeyDown a" + primaryCode);
+
         try {
-            send_to_BT_device(String.valueOf(keyCode));
+            send_to_BT_device(String.valueOf(primaryCode));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return super.onKeyDown(keyCode,event);
+        toastMessage("onKeyDown b" + primaryCode);
 
     }
 

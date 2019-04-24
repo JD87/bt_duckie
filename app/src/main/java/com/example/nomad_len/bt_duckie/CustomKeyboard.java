@@ -8,7 +8,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import static android.support.v4.content.ContextCompat.getSystemService;
 
-public class CustomKeyboard {
+public class  CustomKeyboard {
 
     private KeyboardView mKeyboardView;
     private Activity mHostActivity;
